@@ -1,0 +1,45 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  full_name TEXT NOT NULL DEFAULT '',
+  currency TEXT NOT NULL DEFAULT 'INR',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'INR';
+
+CREATE TABLE IF NOT EXISTS categories (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  id BIGINT NOT NULL,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  icon_key TEXT NOT NULL,
+  color_hex TEXT NOT NULL,
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  parent_category_id BIGINT,
+  PRIMARY KEY (user_id, id)
+);
+
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_category_id BIGINT;
+
+CREATE TABLE IF NOT EXISTS transactions (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  id BIGINT NOT NULL,
+  category_id BIGINT NOT NULL,
+  amount DOUBLE PRECISION NOT NULL,
+  type TEXT NOT NULL,
+  date TIMESTAMPTZ NOT NULL,
+  note TEXT,
+  PRIMARY KEY (user_id, id)
+);
+
+CREATE TABLE IF NOT EXISTS budgets (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  id BIGINT NOT NULL,
+  category_id BIGINT NOT NULL,
+  month_year TEXT NOT NULL,
+  budget_amount DOUBLE PRECISION NOT NULL,
+  PRIMARY KEY (user_id, id)
+);

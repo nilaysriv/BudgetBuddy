@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --console=plain
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk BudgetBuddy-${{ github.ref_name }}.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: BudgetBuddy-${{ github.ref_name }}.apk
+          generate_release_notes: true
